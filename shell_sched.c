@@ -23,7 +23,7 @@ Codename:       noble
 int main(){
     char input[100];
     char comando[100];
-    bool quitRequested = false;
+    int quitRequested = 0;
 
     printf(">shell_sched: ");
     fflush(stdout);
@@ -59,7 +59,7 @@ int main(){
 
         if(strcmp(comando,"exit_scheduler") == 0){
             //quit
-            break;
+            quitRequested = 1;
         }
     }
 
