@@ -13,17 +13,17 @@ Release:        24.04
 Codename:       noble
 */
 
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
+
 int main(){
     char input[100];
     char comando[100];
     int quitRequested = 0;
+    pid_t scheduler = -1;
 
     printf(">shell_sched: ");
     fflush(stdout);
@@ -38,14 +38,38 @@ int main(){
         sscanf(input, "%s", comando);
 
         if(strcmp(comando, "create_user_scheduler") == 0){
-            //user scheduler
             int qtdFilas;
             sscanf(input, "%*s %d", &qtdFilas);
-            printf("serão criadas %i filas\n",qtdFilas);
+            
+
+            if(qtdFilas < 1){
+                printf("bota o numero de filas\n");
+                printf(">shell_sched: ");
+                continue;
+            }
+            else{
+                printf("serão criadas %i filas\n",qtdFilas);
+                if(scheduler == -1){
+                    pid_t pid = fork();
+                    if(pid == 0){ //fork retorna 0 para o processo filho
+                        execl("./user_scheduler", "./user_scheduler", NULL);
+                        exit(0);
+                    }
+                    else{ //caso seja o pai:
+                        scheduler = pid;
+                        printf("scheduler criado com PID %d\n", scheduler);
+                    }
+
+                }
+                else{
+                    printf("scheduler ja criado PID %d\n", scheduler);
+                }
+        }
+
             
         }
 
-        if(strcmp(comando, "execute_process") == 0){
+        else if(strcmp(comando, "execute_process") == 0){
             // execute process
             int prioridade;
             sscanf(input, "%*s %d", &prioridade);
@@ -53,13 +77,17 @@ int main(){
 
         }
 
-        if(strcmp(comando,"list_scheduler") == 0){
+        else if(strcmp(comando,"list_scheduler") == 0){
             //list scheduler
         }
 
-        if(strcmp(comando,"exit_scheduler") == 0){
+        else if(strcmp(comando,"exit_scheduler") == 0){
             //quit
             quitRequested = 1;
+        }else{
+            printf("comando não existe :(\n");
+            printf(">shell_sched: ");
+            continue;
         }
     }
 
