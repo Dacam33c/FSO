@@ -4,12 +4,12 @@ SCHED_PROG = user_scheduler
 CPU_BOUND_PROG = cpu_bound
 
 all:
-	$(COMPILER) -o $(SHELL_PROG) $(SHELL_PROG).c 
-	$(COMPILER) -o $(SCHED_PROG) $(SCHED_PROG).c
-	$(COMPILER) -o $(CPU_BOUND_PROG) $(CPU_BOUND_PROG).c 
+	$(COMPILER) $(SHELL_PROG).c -o $(SHELL_PROG)
+	$(COMPILER) $(SCHED_PROG).c -o $(SCHED_PROG)
+	$(COMPILER) $(CPU_BOUND_PROG).c -o $(CPU_BOUND_PROG) -lm
 
 clean:
-	rm -f $(SHELL_PROG) $(SCHED_PROG)
+	rm -f $(SHELL_PROG) $(SCHED_PROG) $(CPU_BOUND_PROG) *.o *.exe
 
 run:
 	./$(SHELL_PROG)

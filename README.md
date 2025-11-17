@@ -1,9 +1,14 @@
 # Como rodar o projeto
 
-no diretório com o makefile
+clone o repositório
 
->make
+> git clone https://github.com/Dacam33c/FSO.git
+> cd FSO
 
-o cpu_bound.c ainda não foi incluido no makefile, por enquanto compile com 
+no diretório com o makefile rode
 
->gcc cpu_bound.c -o cpu_bound -lm
+> make
+
+no diretório rode
+
+> ./shell_sched
