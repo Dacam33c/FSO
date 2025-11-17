@@ -17,7 +17,7 @@ typedef struct {
     int remaining_quantum_ms;
     double start_time;
     double end_time;
-    int finished; // 0 = n�o terminou, 1 = terminou
+    int finished; // 0 = nao terminou, 1 = terminou
 } pcb_t;
 
 typedef struct {
@@ -49,7 +49,7 @@ double now_ms() {
     return ts.tv_sec * 1000.0 + ts.tv_nsec / 1e6;
 }
 
-/* Inicializa��o */
+/* Inicializacao */
 void scheduler_init(int n) {
     numFilas = n;
     for (int i = 1; i <= n; i++) {
@@ -69,7 +69,7 @@ void start_timer(int ms) {
     setitimer(ITIMER_REAL, &t, NULL);
 }
 
-/* Escolher pr�ximo processo */
+/* Escolher proximo processo */
 void schedule_next() {
     for (int pr = 1; pr <= numFilas; pr++) {
         if (queues[pr].size > 0) {
@@ -90,14 +90,14 @@ void schedule_next() {
 
             kill(current_pid, SIGCONT);
             start_timer(current_remaining_quantum);
-            printf("[scheduler] processo %d (prio %d) em execu��o com quantum=%dms\n",
+            printf("[scheduler] processo %d (prio %d) em execução com quantum=%dms\n",
                 current_pid, pr, current_remaining_quantum);
             return;
         }
     }
     current_pid = -1;
     current_priority = -1;
-    printf("[scheduler] nenhuma tarefa dispon�vel\n");
+    printf("[scheduler] nenhuma tarefa disponível\n");
 }
 
 /* Quantum expirado */
@@ -177,7 +177,7 @@ void scheduler_list() {
             current_pid, current_command, current_priority, current_remaining_quantum);
     }
     else {
-        printf("Nenhum processo em execu��o no momento.\n");
+        printf("Nenhum processo em execuçãoo no momento.\n");
     }
 
     for (int pr = 1; pr <= numFilas; pr++) {
@@ -199,7 +199,7 @@ void scheduler_list() {
 
 /* Exit Scheduler */
 void scheduler_exit() {
-    printf("\n===== RELAT�RIO FINAL =====\n");
+    printf("\n===== RELATÓRIO FINAL =====\n");
 
     // parar timer
     struct itimerval t = { 0 };
@@ -217,11 +217,11 @@ void scheduler_exit() {
         }
     }
 
-    // processos que n�o terminaram (CPU e filas)
-    printf("\nProcessos n�o finalizados:\n");
+    // processos que não terminaram (CPU e filas)
+    printf("\nProcessos não finalizados:\n");
 
     if (current_pid > 0) {
-        printf("  Em execu��o: PID=%d | PRIO=%d\n",
+        printf("  Em execução: PID=%d | PRIO=%d\n",
             current_pid, current_priority);
         kill(current_pid, SIGTERM);
     }
