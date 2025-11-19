@@ -1,0 +1,5 @@
+*.o
+*.exe
+shell_sched
+user_sched
+cpu_bound
