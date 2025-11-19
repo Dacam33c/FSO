@@ -17,7 +17,7 @@ typedef struct {
     int remaining_quantum_ms;
     double start_time;
     double end_time;
-    int finished; // 0 = n√£o terminou, 1 = terminou
+    int finished; // 0 = n„o terminou, 1 = terminou
 } pcb_t;
 
 typedef struct {
@@ -49,12 +49,12 @@ double now_ms() {
     return ts.tv_sec * 1000.0 + ts.tv_nsec / 1e6;
 }
 
-/* Inicializa√ß√£o */
+/* InicializaÁ„o */
 void scheduler_init(int n) {
     numFilas = n;
     for (int i = 1; i <= n; i++) {
         queues[i].size = 0;
-        quantum_ms[i] = 4000; // cada quantum = 4s
+        quantum_ms[i] = 20000; // cada quantum = 20s
         printf(">shell_sched: Fila %d criada (quantum %d ms)\n", i, quantum_ms[i]);
     }
     printf(">shell_sched: ");
@@ -71,7 +71,7 @@ void start_timer(int ms) {
     setitimer(ITIMER_REAL, &t, NULL);
 }
 
-/* Escolher pr√≥ximo processo */
+/* Escolher prÛximo processo */
 void schedule_next() {
     for (int pr = 1; pr <= numFilas; pr++) {
         if (queues[pr].size > 0) {
@@ -201,7 +201,7 @@ void scheduler_list() {
 
 /* Exit Scheduler */
 void scheduler_exit() {
-    printf(">shell_sched: \n===== RELATORIO FINAL =====\n");
+    printf(">shell_sched: \n===== RELAT”RIO FINAL =====\n");
 
     // parar timer
     struct itimerval t = { 0 };
@@ -219,7 +219,7 @@ void scheduler_exit() {
         }
     }
 
-    // processos que n√£o terminaram (CPU e filas)
+    // processos que n„o terminaram (CPU e filas)
     printf("\nProcessos nao finalizados:\n");
 
     if (current_pid > 0) {
@@ -278,7 +278,7 @@ int main(int argc, char* argv[]) {
                 printf(">shell_sched: [scheduler] comando '%s' nao encontrado ou nao executavel\n", cmd);
                 printf(">shell_sched: ");
                 fflush(stdout);
-                continue; // n√£o cria processo
+                continue; // n„o cria processo
             }
 
             pid_t pid = fork();
