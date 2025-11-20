@@ -10,6 +10,7 @@
 #define MAX_QUEUES 3
 #define MAX_PROCESSES 256
 
+// Bloco de Controle de Processo (PCB) simplificado
 typedef struct {
     pid_t pid;
     char command[128];
@@ -17,14 +18,16 @@ typedef struct {
     int remaining_quantum_ms;
     double start_time;
     double end_time;
-    int finished; // 0 = n„o terminou, 1 = terminou
+    int finished; // 0 = n√£o terminou, 1 = terminou
 } pcb_t;
 
+// Processo finalizado
 typedef struct {
     pid_t pid;
     double turnaround_ms;
 } finished_t;
 
+// Fila Round-Robin
 typedef struct {
     pcb_t items[MAX_PROCESSES];
     int size;
@@ -42,19 +45,19 @@ static finished_t finished[MAX_PROCESSES];
 static int finished_count = 0;
 static char current_command[128] = "";
 
-/* tempo atual em ms */
+/* Tempo atual em ms */
 double now_ms() {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return ts.tv_sec * 1000.0 + ts.tv_nsec / 1e6;
 }
 
-/* InicializaÁ„o */
+/* Inicializao do escalonador */
 void scheduler_init(int n) {
     numFilas = n;
     for (int i = 1; i <= n; i++) {
         queues[i].size = 0;
-        quantum_ms[i] = 4000; // cada quantum = 4s
+        quantum_ms[i] = 4000; // Cada quantum = 4s
         printf(">shell_sched: Fila %d criada (quantum %d ms)\n", i, quantum_ms[i]);
     }
     printf(">shell_sched: ");
@@ -71,7 +74,7 @@ void start_timer(int ms) {
     setitimer(ITIMER_REAL, &t, NULL);
 }
 
-/* Escolher prÛximo processo */
+/* Escolher pr√≥ximo processo */
 void schedule_next() {
     for (int pr = 1; pr <= numFilas; pr++) {
         if (queues[pr].size > 0) {
@@ -111,7 +114,7 @@ void handler_timer(int sig) {
         p.pid = current_pid;
         p.priority = current_priority;
         strcpy(p.command, "cpu_bound");
-        p.remaining_quantum_ms = 0; // consumiu todo quantum
+        p.remaining_quantum_ms = 0; // Consumiu todo quantum
         p.start_time = current_start_time;
         p.end_time = 0.0;
         p.finished = 0;
@@ -133,7 +136,7 @@ void handler_child(int sig) {
             printf(">shell_sched: [scheduler] processo %d terminou (turnaround=%.0f ms)\n",
                 pid, turnaround);
 
-            // salvar no finished
+            // Salvar no finished
             finished[finished_count].pid = pid;
             finished[finished_count].turnaround_ms = turnaround;
             finished_count++;
@@ -143,7 +146,7 @@ void handler_child(int sig) {
             schedule_next();
         }
         else {
-            // procurar nas filas
+            // Procurar nas filas
             for (int pr = 1; pr <= numFilas; pr++) {
                 for (int i = 0; i < queues[pr].size; i++) {
                     if (queues[pr].items[i].pid == pid) {
@@ -156,7 +159,7 @@ void handler_child(int sig) {
                         finished[finished_count].turnaround_ms = turnaround;
                         finished_count++;
 
-                        // remover da fila
+                        // Remover da fila
                         for (int j = i + 1; j < queues[pr].size; j++)
                             queues[pr].items[j - 1] = queues[pr].items[j];
                         queues[pr].size--;
@@ -201,13 +204,13 @@ void scheduler_list() {
 
 /* Exit Scheduler */
 void scheduler_exit() {
-    printf(">shell_sched: \n===== RELAT”RIO FINAL =====\n");
+    printf(">shell_sched: \n===== RELAT√ìRIO FINAL =====\n");
 
-    // parar timer
+    // Parar timer
     struct itimerval t = { 0 };
     setitimer(ITIMER_REAL, &t, NULL);
 
-    // imprimir processos finalizados (PID + turnaround)
+    // Imprimir processos finalizados (PID + turnaround)
     printf("\nProcessos finalizados:\n");
     if (finished_count == 0) {
         printf("  Nenhum processo finalizado.\n");
@@ -219,7 +222,7 @@ void scheduler_exit() {
         }
     }
 
-    // processos que n„o terminaram (CPU e filas)
+    // Processos que n√£o terminaram (CPU e filas)
     printf("\nProcessos nao finalizados:\n");
 
     if (current_pid > 0) {
@@ -242,7 +245,11 @@ void scheduler_exit() {
 }
 
 
-/* Main */
+/*
+* Implementa o escalonador preemptivo-interrupt com m√∫ltiplas
+* filas Round-Robin e prioridades est√°ticas. A prioridade 1 √© a mais alta. 
+* Usa sinais (SIGALRM para quantum, SIGCHLD para t√©rmino) e pipe (para IPC). 
+*/
 int main(int argc, char* argv[]) {
     if (argc < 3) {
         fprintf(stderr, "Uso: %s <numFilas> <fd_leitura>\n", argv[0]);
@@ -278,7 +285,7 @@ int main(int argc, char* argv[]) {
                 printf(">shell_sched: [scheduler] comando '%s' nao encontrado ou nao executavel\n", cmd);
                 printf(">shell_sched: ");
                 fflush(stdout);
-                continue; // n„o cria processo
+                continue; // N√£o cria processo
             }
 
             pid_t pid = fork();
@@ -312,7 +319,7 @@ int main(int argc, char* argv[]) {
                         old.remaining_quantum_ms = remaining;
                         old.start_time = current_start_time;
                         old.pid = current_pid;
-                        // coloca na frente da fila
+                        // Coloca na frente da fila
                         for (int i = queues[current_priority].size; i > 0; i--) {
                             queues[current_priority].items[i] = queues[current_priority].items[i - 1];
                         }

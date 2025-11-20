@@ -2,17 +2,23 @@
 #include <time.h>
 #include <math.h>
 
+/*
+* Programa de processo CPU-bound
+* Executa loop que consome CPU por ~20 segundos,
+* medindo o tempo de CPU usado (CLOCK_PROCESS_CPUTIME_ID).
+* O tempo é medido em tempo de CPU, não tempo de relógio.
+*/
 int main() {
     printf("[cpu_bound] iniciado, consumindo CPU (20s de tempo de CPU)...\n");
 
     struct timespec start, now;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
-    // alvo: ~20s de tempo de CPU (n�o tempo de parede)
+    // Alvo: ~20s de tempo de CPU (não tempo de parede)
     const double target_ms = 20000.0;
 
     for (;;) {
-        // trabalho pesado para consumir CPU
+        // Trabalho pesado para consumir CPU
         double x = 0.0;
         for (int i = 0; i < 1000000; i++) {
             x += sqrt((double)i);
@@ -26,6 +32,6 @@ int main() {
         if (elapsed_ms >= target_ms) break;
     }
 
-    printf("[cpu_bound] terminou ap�s ~20s de tempo de CPU\n");
+    printf("[cpu_bound] terminou ap�s ~20s de tempo de CPU\n");
     return 0;
 }

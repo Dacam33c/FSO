@@ -8,7 +8,7 @@ Joao Vitor Dickmann - 211042757
 versao do gcc:
 gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0
 
-vers�o do Linux:
+vers�o do Linux:
 Linux 6.6.87.2-microsoft-standard-WSL2
 Ubuntu 24.04.3 LTS"
 */
@@ -19,6 +19,14 @@ Ubuntu 24.04.3 LTS"
 #include <unistd.h>
 #include <sys/wait.h>
 
+/*
+* Shell para interagir com o escalonador de processos.
+* Comandos suportados:
+* - create_user_scheduler <num_filas>: Cria o escalonador com o número especificado de filas.
+* - execute_process <comando> <prioridade>: Solicita a execução de um processo com a prioridade dada.
+* - list_scheduler: Lista o estado atual do escalonador.
+* - exit_scheduler: Encerra o escalonador e sai da shell.
+*/
 int main() {
     char input[100];
     char comando[100];
@@ -35,7 +43,7 @@ int main() {
     fflush(stdout);
 
     while (!quitRequested && fgets(input, sizeof(input), stdin)) {
-        if (strlen(input) == 1) { // s� \n
+        if (strlen(input) == 1) { // só \n
             printf(">shell_sched: ");
             fflush(stdout);
             continue;
@@ -55,20 +63,20 @@ int main() {
             else {
                 if (scheduler == -1) {
                     pid_t pid = fork();
-                    if (pid == 0) { // filho
-                        close(fd[1]); // fecha escrita
+                    if (pid == 0) { // Filho
+                        close(fd[1]); // Fecha escrita
                         char filasStr[10];
                         sprintf(filasStr, "%d", qtdFilas);
-                        // passa descritor de leitura como argumento
+                        // Passa descritor de leitura como argumento
                         char fdStr[10];
                         sprintf(fdStr, "%d", fd[0]);
                         execl("./user_scheduler", "./user_scheduler", filasStr, fdStr, NULL);
                         perror("execl");
                         exit(1);
                     }
-                    else { // pai
+                    else { // Pai
                         scheduler = pid;
-                        close(fd[0]); // fecha leitura
+                        close(fd[0]); // Fecha leitura
                         printf(">shell_sched: scheduler criado com PID %d\n", scheduler);
                     }
                 }
@@ -112,7 +120,7 @@ int main() {
             if (scheduler != -1) {
                 char msg[50] = "EXIT\n";
                 write(fd[1], msg, strlen(msg));
-                // espera o scheduler terminar e reaproveita
+                // Espera o scheduler terminar e reaproveita
                 waitpid(scheduler, NULL, 0);
                 scheduler = -1;
             }
